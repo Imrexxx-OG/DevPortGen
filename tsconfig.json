@@ -32,3 +32,10 @@
   ],
   "exclude": ["node_modules"]
 }
+
+
+// VS Code's TypeScript language server sometimes gets out of sync when you create a bunch of new files quickly. Restarting it forces it to re-scan the project and pick up all the new files.
+
+// Press Ctrl + Shift + P
+// Type "TypeScript: Restart TS Server"
+// Hit Enter
