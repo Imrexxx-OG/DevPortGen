@@ -33,6 +33,14 @@ export default function HomePage() {
               Sign in with GitHub
               <ArrowRight className="w-5 h-5" />
             </Link>
+            <Link
+              href="/p/imran-damare"
+              target="_blank"
+              className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold px-8 py-4 rounded-lg transition-colors text-lg border border-slate-600"
+            >
+              View Demo
+              <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
         </div>
 
@@ -45,7 +53,8 @@ export default function HomePage() {
               GitHub Integration
             </h3>
             <p className="text-slate-400">
-              Import your repos with one click. We fetch all your project data automatically.
+              Import your repos with one click. We fetch all your project data
+              automatically.
             </p>
           </div>
 
@@ -57,7 +66,8 @@ export default function HomePage() {
               AI-Generated Content
             </h3>
             <p className="text-slate-400">
-              Let AI write your bio and project descriptions. Professional copy in seconds.
+              Let AI write your bio and project descriptions. Professional copy
+              in seconds.
             </p>
           </div>
 
@@ -69,7 +79,8 @@ export default function HomePage() {
               Instant Publishing
             </h3>
             <p className="text-slate-400">
-              Get a live portfolio URL instantly. Share it with recruiters and on LinkedIn.
+              Get a live portfolio URL instantly. Share it with recruiters and
+              on LinkedIn.
             </p>
           </div>
         </div>
