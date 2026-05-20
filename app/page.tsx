@@ -40,7 +40,7 @@ export default function HomePage() {
       <nav className="border-b border-slate-800 bg-slate-900/50 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-white">DevPortGen</h1>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4">
             <Link
               href="/p/imran-damare"
               className="text-slate-300 hover:text-teal-400 transition-colors"
@@ -62,7 +62,7 @@ export default function HomePage() {
         <section className="py-20 text-center">
           <div className="inline-block mb-4">
             <span className="bg-teal-500/10 text-teal-400 px-4 py-2 rounded-full text-sm font-semibold border border-teal-500/20">
-              ✨ AI-Powered Portfolio Generator
+              AI-Powered Portfolio Generator
             </span>
           </div>
           
@@ -308,13 +308,13 @@ export default function HomePage() {
                 avatar: "👩‍💻"
               },
               {
-                name: "Michael Obi",
+                name: "Shareef Habib",
                 role: "Full-Stack Engineer",
                 text: "Finally a portfolio that actually looks professional. Landed 2 interviews in the first week.",
                 avatar: "👨‍💻"
               },
               {
-                name: "Aisha Ibrahim",
+                name: "Emily Davis",
                 role: "Backend Developer",
                 text: "GitHub integration is seamless. All my projects imported perfectly. Highly recommend!",
                 avatar: "👩‍💼"
