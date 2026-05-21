@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { ExternalLink, Edit, Globe, LayoutDashboard } from "lucide-react";
 import { redirect } from "next/navigation";
+import EmptyState from "@/components/EmptyState";
 import CopyLinkButton from "@/components/CopyLinkButton";
 
 export default async function DashboardPage() {
@@ -20,6 +21,11 @@ export default async function DashboardPage() {
     },
   });
 
+  const hasProjects = (portfolio?.projects?.length || 0) > 0;
+  const hasSkills = (portfolio?.skills?.length || 0) > 0;
+  const isPublished = portfolio?.isPublished || false;
+  const showEmptyState = !hasProjects || !hasSkills || !isPublished;
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto p-4">
       <div>
@@ -30,6 +36,14 @@ export default async function DashboardPage() {
           Let's build your AI-powered portfolio
         </p>
       </div>
+
+      {showEmptyState && (
+        <EmptyState 
+          hasProjects={hasProjects}
+          hasSkills={hasSkills}
+          isPublished={isPublished}
+        />
+      )}
 
       {portfolio ? (
         <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 shadow-xl">
