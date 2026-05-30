@@ -15,12 +15,16 @@ interface StepBasicInfoProps {
   };
   updateFormData: (data: any) => void;
   nextStep: () => void;
+  prevStep: () => void;        
+  currentStep: number;          
 }
 
 export default function StepBasicInfo({
   formData,
   updateFormData,
   nextStep,
+  prevStep,                    
+  currentStep,                  
 }: StepBasicInfoProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -284,18 +288,30 @@ export default function StepBasicInfo({
         </p>
       </div>
 
-      {/* Next Step Button */}
-      <button
-        onClick={nextStep}
-        disabled={!isFormValid}
-        className={`w-full font-semibold px-6 py-3 rounded-lg transition-all ${
-          isFormValid
-            ? "bg-teal-600 hover:bg-teal-700 text-white active:scale-95"
-            : "bg-slate-700 text-slate-400 cursor-not-allowed"
-        }`}
-      >
-        Continue to Next Step →
-      </button>
+      {/* Navigation Buttons */}
+      <div className="flex gap-3 justify-between">
+        {currentStep > 1 && (
+          <button
+            onClick={prevStep}
+            type="button"
+            className="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-6 py-3 rounded-lg transition-all"
+          >
+            ← Previous
+          </button>
+        )}
+        
+        <button
+          onClick={nextStep}
+          disabled={!isFormValid}
+          className={`flex-1 font-semibold px-6 py-3 rounded-lg transition-all ${
+            isFormValid
+              ? "bg-teal-600 hover:bg-teal-700 text-white active:scale-95"
+              : "bg-slate-700 text-slate-400 cursor-not-allowed"
+          }`}
+        >
+          Continue to Next Step →
+        </button>
+      </div>
 
       {!isFormValid && (
         <p className="text-sm text-slate-400 text-center">
