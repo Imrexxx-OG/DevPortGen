@@ -1,25 +1,67 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import Link from "next/link";
+// app/(dashboard)/dashboard/page.tsx - UPDATED VERSION WITH SKELETONS
+
+// Note: This is a server component, but we'll wrap it with a client component for skeleton loading
+
+"use client";
+
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { ExternalLink, Edit, Globe, LayoutDashboard } from "lucide-react";
-import { redirect } from "next/navigation";
+import Link from "next/link";
 import EmptyState from "@/components/EmptyState";
 import CopyLinkButton from "@/components/CopyLinkButton";
+import { DashboardSkeleton } from "@/components/SkeletonLoaders";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
-export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+interface Portfolio {
+  id: string;
+  slug: string;
+  isPublished: boolean;
+  projects: Array<{ id: string; title: string }>;
+  skills: string[];
+}
 
-  if (!session?.user) {
-    redirect("/login");
+export default function DashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [portfolio, setPortfolio] = useState<Portfolio | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+      return;
+    }
+
+    if (status === "authenticated") {
+      fetchPortfolio();
+    }
+  }, [status, router]);
+
+  const fetchPortfolio = async () => {
+    try {
+      const response = await fetch("/api/portfolio");
+      const data = await response.json();
+      setPortfolio(data || null);
+    } catch (error) {
+      console.error("Failed to fetch portfolio:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (status === "loading" || isLoading) {
+    return <DashboardSkeleton />;
   }
 
-  const portfolio = await prisma.portfolio.findUnique({
-    where: { userId: session.user.id },
-    include: { 
-      projects: true,
-    },
-  });
+  if (!session?.user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Redirecting..." />
+      </div>
+    );
+  }
 
   const hasProjects = (portfolio?.projects?.length || 0) > 0;
   const hasSkills = (portfolio?.skills?.length || 0) > 0;
@@ -28,6 +70,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto p-4">
+      {/* Welcome Header */}
       <div>
         <h1 className="text-3xl font-bold text-white flex items-center gap-2">
           Welcome, {session.user.name}! 👋
@@ -37,20 +80,20 @@ export default async function DashboardPage() {
         </p>
       </div>
 
+      {/* Empty State Onboarding */}
       {showEmptyState && (
-        <EmptyState 
+        <EmptyState
           hasProjects={hasProjects}
           hasSkills={hasSkills}
           isPublished={isPublished}
         />
       )}
 
+      {/* Portfolio Card */}
       {portfolio ? (
         <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 shadow-xl">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-white">
-              Your Portfolio
-            </h2>
+            <h2 className="text-xl font-semibold text-white">Your Portfolio</h2>
             <span
               className={`px-3 py-1 rounded-full text-sm font-semibold border ${
                 portfolio.isPublished
@@ -63,6 +106,7 @@ export default async function DashboardPage() {
           </div>
 
           <div className="space-y-4">
+            {/* Portfolio URL */}
             <div className="flex items-center justify-between bg-slate-900/50 p-3 rounded-md">
               <div className="flex items-center gap-2 text-slate-300">
                 <Globe className="w-4 h-4 text-teal-400" />
@@ -71,6 +115,7 @@ export default async function DashboardPage() {
               <CopyLinkButton slug={portfolio.slug} />
             </div>
 
+            {/* Action Buttons */}
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/builder"
@@ -117,6 +162,7 @@ export default async function DashboardPage() {
         </div>
       )}
 
+      {/* Quick Stats */}
       <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
         <h2 className="text-xl font-semibold text-white mb-4">Quick Stats</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -151,22 +197,48 @@ function PublishButton({
   portfolioId: string;
   isPublished: boolean;
 }) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handlePublish = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/portfolio/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          portfolioId,
+          isPublished: !isPublished,
+        }),
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Failed to publish:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <form action="/api/portfolio/publish" method="POST">
-      <input type="hidden" name="portfolioId" value={portfolioId} />
-      <input
-        type="hidden"
-        name="isPublished"
-        value={(!isPublished).toString()}
-      />
+    <form onSubmit={handlePublish}>
       <button
         type="submit"
-        className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-          isPublished
+        disabled={isLoading}
+        className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+          isLoading
+            ? "bg-slate-600 text-slate-400 cursor-not-allowed"
+            : isPublished
             ? "bg-slate-600 hover:bg-slate-500 text-white"
             : "bg-green-600 hover:bg-green-700 text-white"
         }`}
       >
+        {isLoading && (
+          <div className="w-4 h-4 border-2 border-slate-300 border-t-white rounded-full animate-spin" />
+        )}
         {isPublished ? "Unpublish" : "Publish"}
       </button>
     </form>

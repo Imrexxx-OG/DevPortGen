@@ -76,7 +76,7 @@ export default function HomePage() {
           
           <p className="text-xl md:text-2xl text-slate-400 mb-8 max-w-3xl mx-auto">
             Import projects from GitHub, generate professional content with AI, 
-            and publish your portfolio at your custom URL — all without writing a single line of code.
+            and publish your portfolio at your custom URL, all without writing a single line of code.
           </p>
 
           {/* CTA Buttons */}
