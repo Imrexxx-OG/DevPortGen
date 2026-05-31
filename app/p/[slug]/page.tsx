@@ -1,20 +1,18 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import NovaTemplate, {
-  SocialLinks,
-} from "@/components/templates/nova/NovaTemplate";
+import NovaPro from "@/components/templates/nova-pro/NovaPro";
 
 interface Props {
-  params: Promise<{ slug: string }>; // CHANGED: params is now a Promise in Next.js 15+
+  params: Promise<{ slug: string }>;
 }
 
 export default async function PublicPortfolioPage({ params }: Props) {
-  const { slug } = await params; // CHANGED: await the params
+  const { slug } = await params;
 
   const portfolio = await prisma.portfolio.findUnique({
-    where: { slug }, // Now slug has the actual value
+    where: { slug },
     include: {
-      user: { select: { name: true, image: true } },
+      user: { select: { name: true, image: true, email: true } },
       projects: { orderBy: { displayOrder: "asc" } },
     },
   });
@@ -23,21 +21,62 @@ export default async function PublicPortfolioPage({ params }: Props) {
     return notFound();
   }
 
-  // Normalize Prisma JSON → UI-safe object
-  const normalizedPortfolio = {
-    ...portfolio,
-    socialLinks:
-      typeof portfolio.socialLinks === "object" &&
-      portfolio.socialLinks !== null
-        ? (portfolio.socialLinks as SocialLinks)
-        : undefined,
+  // Parse skills - handle both string and array formats
+  let parsedSkills: string[] = [];
+  if (typeof portfolio.skills === "string") {
+    try {
+      parsedSkills = JSON.parse(portfolio.skills);
+    } catch {
+      parsedSkills = [];
+    }
+  } else if (Array.isArray(portfolio.skills)) {
+    parsedSkills = portfolio.skills;
+  }
+
+  // Transform projects
+  const transformedProjects = portfolio.projects.map((project) => {
+    let technologies: string[] = [];
+    if (typeof project.technologies === "string") {
+      try {
+        technologies = JSON.parse(project.technologies);
+      } catch {
+        technologies = [];
+      }
+    } else if (Array.isArray(project.technologies)) {
+      technologies = project.technologies as string[];
+    }
+
+    return {
+      id: project.id,
+      title: project.title,
+      description: project.description,
+      url: project.liveUrl || undefined,
+      github: project.repoUrl || undefined,
+      technologies,
+      image: project.image || undefined,
+    };
+  });
+
+  const transformedPortfolio = {
+    name: portfolio.user?.name || "Developer",
+    email: portfolio.user?.email || "contact@example.com",
+    bio: portfolio.bio || portfolio.tagline || "",
+    skills: parsedSkills,
+    projects: transformedProjects,
+    socialLinks: {
+      github: (portfolio.socialLinks as any)?.github || undefined,
+      twitter: (portfolio.socialLinks as any)?.twitter || undefined,
+      linkedin: (portfolio.socialLinks as any)?.linkedin || undefined,
+      website: (portfolio.socialLinks as any)?.website || undefined,
+    },
+    web3Address: portfolio.web3Address || undefined,
   };
 
-  return <NovaTemplate portfolio={normalizedPortfolio} />;
+  return <NovaPro portfolio={transformedPortfolio} />;
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { slug } = await params; // CHANGED: await the params here too
+  const { slug } = await params;
 
   const portfolio = await prisma.portfolio.findUnique({
     where: { slug },
