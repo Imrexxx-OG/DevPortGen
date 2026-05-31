@@ -33,27 +33,18 @@ export default async function PublicPortfolioPage({ params }: Props) {
     parsedSkills = portfolio.skills;
   }
 
-  // Transform projects
+  // Transform projects - match actual Prisma field names
   const transformedProjects = portfolio.projects.map((project) => {
-    let technologies: string[] = [];
-    if (typeof project.technologies === "string") {
-      try {
-        technologies = JSON.parse(project.technologies);
-      } catch {
-        technologies = [];
-      }
-    } else if (Array.isArray(project.technologies)) {
-      technologies = project.technologies as string[];
-    }
-
     return {
       id: project.id,
       title: project.title,
       description: project.description,
       url: project.liveUrl || undefined,
-      github: project.repoUrl || undefined,
-      technologies,
-      image: project.image || undefined,
+      github: project.githubUrl || undefined,
+      technologies: Array.isArray(project.techStack)
+        ? project.techStack
+        : [],
+      image: project.imageUrl || undefined,
     };
   });
 
